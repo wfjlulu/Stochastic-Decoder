@@ -13,42 +13,42 @@
 void d3_subunit_mex(int in1, int in2, int in3,int *IM_REG, int rand01, int *b);
 void d2_subunit_mex( int b1, int b2, int * r, int *s );
 
-void Shuffled_MTFM_mex ( double *LLR, double N0; double * H , double * codeword )
+void Shuffled_MTFM_mex ( double *LLR, double N0, double * H , double * codeword )
 {
     const int It_Max = 500;
     const double BETA = 1.0/16;
     const double alpha = 3.0;
     const double Y = 6.0;
-    double LLRAfter_NDS[VN];
+    double LLR_NDS[VN];
     double Pn[VN];
     double rand01[VN][2];
-    int rand_IM[vn][8];
-    int ChannelBit[VN];
-    int Hc[cn][vn] = {0};
-    int ColumIndex[VN_DEGREE][vn];
-    int RowIndex[cn][CN_DEGREE];
-    int CN2VN[cn][vn] = {0};
-    int VN2CN[cn][vn] = {0};
-    int IM_REG [vn][16] = {0};
-    double Pt_TFM[vn];
+    int rand_IM[VN][8];
+    int ChannelBits[VN];
+    int Hc[CN][VN] = {0};
+    int ColumIndex[VN_DEGREE][VN];
+    int RowIndex[CN][CN_DEGREE];
+    int CN2VN[CN][VN] = {0};
+    int VN2CN[CN][VN] = {0};
+    int IM_REG [VN][16] = {0};
+    double Pt_TFM[VN];
     int NG = 128;
     int G = VN/NG;
 
         // find Hc from H
-    for ( int i = 0 ;i < cn ; i++)  //  loop
+    for ( int i = 0 ;i < CN ; i++)  //  loop
     {
-        for ( int j = 0; j < vn; j++)  //  loop
+        for ( int j = 0; j < VN; j++)  //  loop
         {
-            Hc[i][j] = (int)H[j*cn+i];  // Hc is defined as int 
+            Hc[i][j] = (int)H[j*CN+i];  // Hc is defined as int 
         }
     }
 
     // get index for cn and vn update
     // different from the matlab , index of c begins from 0, be careful!
-    for ( int i = 0; i < vn; i++ )
+    for ( int i = 0; i < VN; i++ )
     {   
         int count = 0;
-        for ( int j = 0; j < cn; j++ )
+        for ( int j = 0; j < CN; j++ )
         {   
             if ( Hc[j][i] == 1)
             {
@@ -58,10 +58,10 @@ void Shuffled_MTFM_mex ( double *LLR, double N0; double * H , double * codeword 
         }
     }
 
-    for ( int i = 0; i< cn; i++)
+    for ( int i = 0; i< CN; i++)
     {
         int count = 0;
-        for ( int j = 0; j < vn; j++)
+        for ( int j = 0; j < VN; j++)
         {
             if ( Hc[i][j] == 1)
             {
@@ -72,7 +72,7 @@ void Shuffled_MTFM_mex ( double *LLR, double N0; double * H , double * codeword 
     }
 
     //NDS and get bit stream
-    for ( int i = 0; i<vn; i++)
+    for ( int i = 0; i< VN ; i++)
     {
         LLR_NDS[i] = alpha*N0/Y*LLR[i];
         Pn[i] = 1.0 / ( 1.0 + exp(LLR_NDS[i]) );
@@ -83,7 +83,7 @@ void Shuffled_MTFM_mex ( double *LLR, double N0; double * H , double * codeword 
     srand((unsigned int)time(NULL));    //reset seed every fram
     for (int iter = 0; iter < It_Max; iter++) //iteration loop
     {
-        for ( int i = 0;i < vn;i++)
+        for ( int i = 0;i < VN ;i++)
         {
             rand01[i][0] = rand() / ( RAND_MAX + 1.0 ); //for channel bit
             rand01[i][1] = rand() / ( RAND_MAX + 1.0 ); //for TFM
@@ -97,9 +97,9 @@ void Shuffled_MTFM_mex ( double *LLR, double N0; double * H , double * codeword 
         // VN2CN initial by channel
         if ( iter == 0)
         {
-            for ( int i = 0;i < cn; i++)
+            for ( int i = 0;i < CN; i++)
             {
-                for ( int j = 0; j < vn ; j++)
+                for ( int j = 0; j < VN ; j++)
                 {
                     VN2CN[i][j] = ChannelBits[j];
                 }
@@ -128,7 +128,7 @@ void Shuffled_MTFM_mex ( double *LLR, double N0; double * H , double * codeword 
                            VN2CN [cn_index] [ RowIndex[cn_index][10] ]^
                            VN2CN [cn_index] [ RowIndex[cn_index][11] ]^
                            VN2CN [cn_index] [ RowIndex[cn_index][12] ]^
-                           VN2CN [cn_index] [ RowIndex[cn_index][12] ]^
+                           VN2CN [cn_index] [ RowIndex[cn_index][13] ]^
                            VN2CN [cn_index] [ RowIndex[cn_index][14] ]^
                            VN2CN [cn_index] [ RowIndex[cn_index][15] ]^
                            VN2CN [cn_index] [ RowIndex[cn_index][16] ]^
@@ -234,26 +234,26 @@ void Shuffled_MTFM_mex ( double *LLR, double N0; double * H , double * codeword 
                 int insum = in1 + in2 + in3 +in4 + in5 + in6; // decision
                 codeword[i] = (( ChannelBits[i] + insum ) > 3 );
     
-                }
+            }
         } // end group loop
 
-        int check[cn] = {0};
+        int check[CN] = {0};
         int sum = 0;
 
-        if( iter == IT_MAX )
+        if( iter == It_Max )
         {
             break;
         }
         else
         {
-            for ( int kcn = 0; kcn < cn; kcn++)
+            for ( int kcn = 0; kcn < CN; kcn++)
             {
-                for ( int kvn = 0; kvn < vn; kvn++)
+                for ( int kvn = 0; kvn < VN; kvn++)
                 {
                     check[kcn] = check[kcn] + Hc[kcn][kvn] * (int)codeword[kvn];
                 }
             }
-            for(int kcn = 0; kcn < cn; kcn++)
+            for(int kcn = 0; kcn < CN ; kcn++)
             {
                 check[kcn] = ( check[kcn] % 2 );
                 sum = sum + check[kcn];
@@ -309,7 +309,7 @@ void mexFunction( int nlhs, mxArray * plhs[], int nrhs, const mxArray * prhs[])
     N0 = mxGetScalar(prhs[1]);
     H = mxGetPr(prhs[2]);
     
-    plhs[0] = mxCreateDoubleMatrix(vn,1,mxREAL);
+    plhs[0] = mxCreateDoubleMatrix(VN,1,mxREAL);
     codeword = mxGetPr(plhs[0]);
 
     Shuffled_MTFM_mex(LLR,N0,H,codeword);
